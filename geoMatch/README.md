@@ -1,7 +1,7 @@
 
-# geo.match
+# geoMatch
 
-> geo.match
+> geoMatch
 
 A package designed to provide matched data for propensity-score based causal analyses using spatially-explicit data
 
@@ -10,7 +10,7 @@ A package designed to provide matched data for propensity-score based causal ana
 ## Usage
 
 ```r
-library(geo.match)
+library(geoMatch)
 ```
 
 ## License
