@@ -28,9 +28,6 @@ coords = cbind(runif(nrow(lalonde),37.1708,37.3708), runif(nrow(lalonde),76.6069
 ##Create a spatial points data frame
 spatial_lalonde <- SpatialPointsDataFrame(coords, lalonde)
 
-##Optionally plot the new spatial data
-spplot(spatial_lalonde, z=c("treat"))
-
 ##Matching and adjusting for spillover effects
 match.out2 <- geoMatch(treat ~ age + educ + black + hispan + nodegree + married + re74 + re75, 
                       method = "nearest", caliper=0.25, data = spatial_lalonde, 
