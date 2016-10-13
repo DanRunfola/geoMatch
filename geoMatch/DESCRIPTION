@@ -5,7 +5,7 @@ Author: Dan Runfola
 Maintainer: Dan Runfola <dan@danrunfola.com>
 Description: A package designed to provide matched data for propensity-score based causal analyses using spatially-explicit data
 License: Other
-Imports: MatchIt, sp
+Imports: MatchIt, sp, ncf
 Depends: R (>= 3.2.3)
 Enhances: MatchIt
 LazyData: true

@@ -5,12 +5,15 @@
 #' @docType package
 #' @name geoMatch
 require(MatchIt)
+require(sp)
+library(ncf)
 geoMatch <- function (..., outcome.variable)
 {
+  spatial_match = -1
   a <- list(...)
   if (missing(outcome.variable) & isS4(a[['data']]))
     {
-      warning("You are using a spatial dataframe, but did not assign a outcome.variable.  \nThis is required for spatial adjustments.  \nMatchIt will be performed ignoring spatial options.")
+      warning("You are using a spatial dataframe, but did not assign a outcome.variable. This is required for spatial adjustments.  MatchIt will be performed ignoring spatial options.")
       spatial_match = FALSE
       if("data" %in% names(a))
       {
@@ -21,9 +24,9 @@ geoMatch <- function (..., outcome.variable)
       a[['data']] <- dfA
   }
   
-  if(!missing(outcome.variable) & !isS4(a[['data']]))
+  if(!missing(outcome.variable) & !isS4(a[['data']]) & spatial_match==-1)
     {
-    warning("You assigned an outcome variable, but your data is not a spatial data frame.  \nA spatial data frame is required for spatial adjustments.  \nMatchIt will be performed ignoring spatial options.")
+    warning("You assigned an outcome variable, but your data is not a spatial data frame. A spatial data frame is required for spatial adjustments.  MatchIt will be performed ignoring spatial options.")
     spatial_match = FALSE  
     if("data" %in% names(a))
       {
@@ -31,10 +34,10 @@ geoMatch <- function (..., outcome.variable)
         dName <- as.character(match.call()$data)
       }
   }
-  if(missing(outcome.variable) & !isS4(a[['data']]))
+  if(missing(outcome.variable) & !isS4(a[['data']]) & spatial_match==-1)
   {
-    warning("To use the spatial functions of geoMatch, you must specify a spatial \ndata frame and outcome.variable.\nMatchIt is being run ignoring spatial options.")
-    spatial_match == FALSE
+    warning("To use the spatial functions of geoMatch, you must specify a spatial data frame and outcome.variable.  MatchIt is being run ignoring spatial options.")
+    spatial_match = FALSE
     if("data" %in% names(a))
     {
       #Pass the data name forward for a cleaner summary
@@ -49,28 +52,36 @@ geoMatch <- function (..., outcome.variable)
     m.out$call$data <- dName
     return(m.out)
   }
+  
+  if(!missing(outcome.variable) & isS4(a[['data']]) & spatial_match != FALSE)
+  {
+    x.coord <- coordinates(a[['data']])[,2]
+    y.coord <- coordinates(a[['data']])[,1]
+
+    if(max(x.coord) > 180.0 | min(x.coord) < -180.0 | max(y.coord) > 90.0 | min(y.coord) < -90.0)
+    {
+      warning("geoMatch currently only supports data projected with latitude and longitude information (WGS84).  Please reproject your data.")
+      return(0)
+    }
+    
+    if(class(spatial_lalonde)[1] == "SpatialPointsDataFrame")
+    {
+      o_var <- outcome.variable
+      geoMatch.Core(..., outcome.variable = o_var)
+    }
+    else
+    {
+      warning("Currently only spatial points data frames are supported.  Please convert your spatial data to a Spatial Points Data Frame.")
+      return(0)
+    }
+  }
+  else
+  {
+    warning("geoMatch encountered an error. Ensure that you have specified a valid spatial dataframe and outcome.variable.")
+    return(0)
+  }
+  
 }
   
-  #First, calculate the OVB function (third order poly for now).
-  
-  #Second, for every Treated unit
-    #use MatchIt as specified by the user to identify the best match
-    #(or set of matches).
-    #Record the matches found, and calculate the distances between Cs and Ts (matrix for all Ts)
-  
-  #Parameterize a model which best predicts Cs as a function of the distance to the matched Ts
-  #Across all matrices.  For each individual T, this function defines it's spillover.
-  
-  #Third, run a normal, full MatchIt model according to the users specified MatchIt.
-  
-  #Fourth, Calculate the Distances between all control cases included in the model and all Ts.
-  
-  #Fifth, adjust each matched C's outcome measure (Y*) according to the estimated spillover, given
-  #the distance to Ts as well as the OVB function.
-  
-  #Sixth, this function returns the new dataframe with the distance-adjusted outcomes,
-  #which do not include spillover effects, as well as the MatchIt pairs.
-  
-  #Outside of this function, the user runs their model with the returned, adjusted, 
-  #matched and transformed dataset.
+
 

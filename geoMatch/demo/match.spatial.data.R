@@ -20,22 +20,44 @@ lm.out1 <- lm(re78 ~ treat + age + educ + black + hispan + nodegree + married + 
 
 summary(lm.out1)
 
-##Simulate Latitude and Longtiude information for each point
-set.seed(424)
+##Simulate Latitude and Longtiude information for each point, 
+##with enforced spatial correlation.
+set.seed(500)
 coords = cbind(runif(nrow(lalonde),37.1708,37.3708), runif(nrow(lalonde),76.6069,76.8069))
 
 ##Create a spatial points data frame
 spatial_lalonde <- SpatialPointsDataFrame(coords, lalonde)
 
 ##Optionally plot the new spatial data
-spplot(spatial_lalonde, z=c("age"))
+spplot(spatial_lalonde, z=c("treat"))
 
-##Spatially-weighted 
+##Matching and adjusting for spillover effects
 match.out2 <- geoMatch(treat ~ age + educ + black + hispan + nodegree + married + re74 + re75, 
-                      method = "nearest", data = lalonde)#, outcome.variable="re78_adjusted")
+                      method = "nearest", caliper=0.25, data = spatial_lalonde, 
+                      outcome.variable="re78", 
+                      optim.iterations=10000,
+                      outcome.suffix="_adjusted")
 
-##Example model performed after spatial adjustment, including both Control and Treatment groups
-#lm.out2 <- lm(re78_adjusted ~ treat + age + educ + black + hispan + nodegree + married + re74 + re75 +
-#                distance, data = match.data(match.out2))
 
-#summary(lm.out2)
+##Example maps 
+spplot(match.out2$spdf, z="matched", col.regions=c("red","green"), main="Map of Matched Pairs")
+spplot(match.out2$spdf, z="propensity", main="Propensity Scores")
+spplot(match.out2$spdf, z="est_spillovers", main="Estimated Spillovers")
+spplot(match.out2$spdf, z="re78_adjusted", main="Adjusted Outcome")
+
+#Percent of outcomes attributable to spillovers
+match.out2$spdf@data["spill_percent"] <- 100 * 
+  (match.out2$spdf@data["est_spillovers"] / match.out2$spdf@data["re78"])
+
+spplot(match.out2$spdf[!is.infinite(match.out2$spdf@data$spill_percent) & 
+                         match.out2$spdf@data$treat == 0,], 
+       z="spill_percent", 
+       main="% Outcome Attributable to Spillover",
+       pretty=TRUE,
+       cuts=3)
+
+##Example model performed after spatial spillover adjustment, using matched data
+lm.out2 <- lm(re78_adjusted ~ treat + age + educ + black + hispan + nodegree + married + re74 + re75 +
+               distance, data = match.data(match.out2))
+
+summary(lm.out2)
