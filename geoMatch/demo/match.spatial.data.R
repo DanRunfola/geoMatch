@@ -1,8 +1,8 @@
 library(devtools)
 library(sp)
 library(MatchIt)
-detach("package:geoMatch", unload=TRUE)
-load_all("~/Desktop/Github/geo.match/geoMatch/R")
+install_github("itpir/geoMatch")
+library(geoMatch)
 
 ###
 ### An Example Script for Obtaining Matched Data when you have
@@ -29,10 +29,10 @@ coords = cbind(runif(nrow(lalonde),37.1708,37.3708), runif(nrow(lalonde),76.6069
 spatial_lalonde <- SpatialPointsDataFrame(coords, lalonde)
 
 ##Matching and adjusting for spillover effects
+##See ?MatchIt for more options for matching methods.
 match.out2 <- geoMatch(treat ~ age + educ + black + hispan + nodegree + married + re74 + re75, 
                       method = "nearest", caliper=0.25, data = spatial_lalonde, 
                       outcome.variable="re78", 
-                      optim.iterations=10000,
                       outcome.suffix="_adjusted")
 
 
