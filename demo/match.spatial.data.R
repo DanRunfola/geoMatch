@@ -1,6 +1,4 @@
 library(devtools)
-library(sp)
-library(MatchIt)
 install_github("itpir/geoMatch")
 library(geoMatch)
 
@@ -59,3 +57,9 @@ lm.out2 <- lm(re78_adjusted ~ treat + age + educ + black + hispan + nodegree + m
                distance, data = match.data(match.out2))
 
 summary(lm.out2)
+
+##Example model with spatial lag after spatial spillover adjustment
+library(spdep)
+sl.out3 <- lagsarlm(re78_adjusted ~ treat + age + educ + black + hispan + nodegree + married + re74 + re75 +
+                      distance, data=match.out2$spdf[match.out2$spdf@data$matched == 1,],
+                        nb2listw(COL.nb, style="W"), method="eigen", quiet=FALSE)
