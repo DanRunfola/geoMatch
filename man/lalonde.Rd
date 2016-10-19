@@ -3,7 +3,7 @@
 \alias{lalonde}
 \title{Data from National Supported Work Demonstration and PSID, as analyzed by Dehejia and Wahba (1999).}
 
-\description{ This documentation is sourced from the MatchIt package, and any uses of this description should cite the appropriate work (see ?lalonde after installing MatchIt).  This is a subsample of the data from the treated group in the National Supported
+\description{ This documentation is sourced from the MatchIt package, and any uses of this description should cite the appropriate work (see ?MatchIt::lalonde).  This is a subsample of the data from the treated group in the National Supported
   Work Demonstration (NSW) and the comparison sample from the Current Population Survey (CPS).  
   This data was previously analyzed extensively by Lalonde (1986) and Dehejia and Wahba (1999).  
   The full dataset is available at \url{http://www.columbia.edu/~rd247/nswdata.html}. }

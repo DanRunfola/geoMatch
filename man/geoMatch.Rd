@@ -112,7 +112,6 @@ coords = cbind(runif(nrow(lalonde),37.1708,37.3708),
                runif(nrow(lalonde),76.6069,76.8069))
 
 ##Create a spatial points data frame
-spatial_lalonde <- NULL
 spatial_lalonde <- SpatialPointsDataFrame(coords, lalonde)
 
 ##Matching and adjusting for spillover effects

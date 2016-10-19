@@ -1,7 +1,7 @@
 Package: geoMatch
 Title: geoMatch
 Version: 0.1.1
-Author: Dan Runfola
+Author: Dan Runfola  <dan@danrunfola.com>, Ariel BenYishay <abenyishay@wm.edu>, Seth Goodman <sgoodman@aiddata.org>
 Maintainer: Dan Runfola <dan@danrunfola.com>
 Description: geoMatch improves models using spatial data for the purposes of causal inference by (a) adjusting for spatial spillover effects, and (b) leveraging MatchIt to select matched subsets of spatially defined treated and control locations.
 License: MIT + file LICENSE
