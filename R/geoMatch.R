@@ -4,9 +4,12 @@
 #'
 #' @docType package
 #' @name geoMatch
+#' @export
+#' @import sp
+#' @import MatchIt
 require(MatchIt)
 require(sp)
-library(ncf)
+
 geoMatch <- function (..., outcome.variable)
 {
   spatial_match = -1
