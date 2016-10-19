@@ -1,4 +1,2 @@
-
 # 0.0.1
-
-First public release.
+Internal alpha candidate release of the geoMatch package (Sept 10 2016).

@@ -5,6 +5,9 @@
 \alias{geoMatch}
 \alias{geoMatch-package}
 \title{geoMatch}
+\usage{
+geoMatch(..., outcome.variable)
+}
 \description{
 A package designed to provide matched data for propensity-score based causal analyses using spatially-explicit data
 }

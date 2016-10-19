@@ -1,5 +1,3 @@
-library(devtools)
-install_github("itpir/geoMatch")
 library(geoMatch)
 
 ###
@@ -9,6 +7,7 @@ library(geoMatch)
 data(lalonde)
 
 ##Traditional, non-spatial MatchIt
+library(MatchIt)
 match.out1 <- matchit(treat ~ age + educ + black + hispan + 
                         nodegree + married + re74 + re75, 
                   method = "nearest", data = lalonde)
@@ -21,6 +20,7 @@ summary(lm.out1)
 
 ##Simulate Latitude and Longtiude information for each point, 
 ##with enforced spatial correlation.
+library(sp)
 set.seed(500)
 coords = cbind(runif(nrow(lalonde),37.1708,37.3708), 
                runif(nrow(lalonde),76.6069,76.8069))
@@ -65,14 +65,18 @@ lm.out2 <- lm(re78_adjusted ~ treat + age + educ + black + hispan + nodegree +
 summary(lm.out2)
 
 ##Example model with spatial lag after spatial spillover adjustment
+##For more information on practical specifications for these models, see
+##Corrado, Luisa, and Bernard Fingleton. Where is the economics in spatial 
+##econometrics?. Journal of Regional Science 52.2 (2012): 210-239.
 library(spdep)
-coords <- coordinates(match.out2$spdf[match.out2$spdf@data$matched == 1,])
-#Weights matrix based on 15 nearest neighbors
+matched.spatial <- match.out2$spdf[match.out2$spdf@data$matched == 1,]
+coords <- coordinates(matched.spatial)
 k1 <- knn2nb(knearneigh(coords, k=15))
 all.linked <- max(unlist(nbdists(k1, coords)))
 neighbor.list <- dnearneigh(coords, 0, all.linked)
-sl.out3 <- lagsarlm(re78_adjusted ~ treat + age + educ + black + hispan + 
+sl.out3 <- lagsarlm(re78 ~ treat + age + educ + black + hispan + 
                       nodegree + married + re74 + re75 + distance, 
-                    data=match.out2$spdf[match.out2$spdf@data$matched == 1,],
-                        nb2listw(neighbor.list, style="W"), method="eigen", quiet=FALSE)
+                    data=matched.spatial,
+                        nb2listw(neighbor.list, style="W"), method="MC", quiet=TRUE,
+                        tol.solve=1.0e-16)
 summary(sl.out3)

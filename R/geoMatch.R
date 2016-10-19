@@ -9,8 +9,8 @@
 #' @import MatchIt
 geoMatch <- function (..., outcome.variable)
 {
-  require(MatchIt)
-  require(sp)
+  suppressMessages(require(MatchIt))
+  suppressMessages(require(sp))
   spatial_match = -1
   a <- list(...)
   if (missing(outcome.variable) & isS4(a[['data']]))
