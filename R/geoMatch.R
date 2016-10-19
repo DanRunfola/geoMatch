@@ -123,7 +123,7 @@ geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted",optim.ite
       return(0)
     }
     
-    if(class(spatial_lalonde)[1] == "SpatialPointsDataFrame")
+    if(class(a[['data']])[1] == "SpatialPointsDataFrame")
     {
       o_var <- outcome.variable
       geoMatch.Core(..., outcome.variable = o_var)

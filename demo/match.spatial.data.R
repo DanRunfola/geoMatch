@@ -27,7 +27,7 @@ coords = cbind(runif(nrow(lalonde),37.1708,37.3708),
 
 ##Create a spatial points data frame
 spatial_lalonde <- NULL
-spatial_lalonde <- SpatialPointsDataFrame(coords, lalonde) 
+spatial_lalonde <- SpatialPointsDataFrame(coords, lalonde)
 
 ##Matching and adjusting for spillover effects
 ##See ?geoMatch for more parameters specific to spatial data.
@@ -38,7 +38,8 @@ match.out2 <- geoMatch(treat ~ age + educ + black + hispan + nodegree +
                       caliper=0.25, 
                       data = spatial_lalonde, 
                       outcome.variable="re78", 
-                      outcome.suffix="_adjusted")
+                      outcome.suffix="_adjusted",
+                      optim.iterations = 100)
 
 
 ##Example maps 

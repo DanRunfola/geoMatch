@@ -124,7 +124,8 @@ match.out2 <- geoMatch(treat ~ age + educ + black + hispan + nodegree +
                       caliper=0.25, 
                       data = spatial_lalonde, 
                       outcome.variable="re78", 
-                      outcome.suffix="_adjusted")
+                      outcome.suffix="_adjusted",
+                      optim.iterations = 100)
 
 
 ##Example maps 
