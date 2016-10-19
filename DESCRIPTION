@@ -1,6 +1,6 @@
 Package: geoMatch
 Title: geoMatch
-Version: 0.0.1
+Version: 0.1.1
 Author: Dan Runfola
 Maintainer: Dan Runfola <dan@danrunfola.com>
 Description: A package designed to provide matched data for propensity-score based causal analyses using spatially-explicit data

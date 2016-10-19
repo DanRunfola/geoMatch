@@ -119,7 +119,7 @@ $(document).ready(function () {
 <p>A package designed to provide matched data for propensity-score based causal analyses using spatially-explicit data. Fully compatible with matching strategies available in the MatchIt package, geoMatch provides adjusted outcome measures which mitigate bias associated with spillover from areas which received interventions to proximate areas that did not.</p>
 <div id="installation" class="section level2">
 <h2>Installation</h2>
-<p>geoMatch imports both the sp and MatchIt packages.</p>
+<p>install.packages(“geoMatch”) geoMatch imports both the sp and MatchIt packages.</p>
 </div>
 <div id="usage" class="section level2">
 <h2>Usage</h2>
@@ -141,10 +141,8 @@ match.out2 &lt;- geoMatch(treat ~ age + educ + black + hispan + nodegree +
                       caliper=0.25, 
                       data = spatial_lalonde, 
                       outcome.variable=&quot;re78&quot;, 
-                      outcome.suffix=&quot;_adjusted&quot;)</code></pre>
-<pre><code>#&gt; Loading required package: MatchIt</code></pre>
-<pre><code>#&gt; Loading required package: MASS</code></pre>
-<pre class="r"><code>lm.out2 &lt;- lm(re78_adjusted ~ treat + age + educ + black + hispan + nodegree + 
+                      outcome.suffix=&quot;_adjusted&quot;)
+lm.out2 &lt;- lm(re78_adjusted ~ treat + age + educ + black + hispan + nodegree + 
                 married + re74 + re75 + distance, 
               data = match.data(match.out2))
 summary(lm.out2)</code></pre>

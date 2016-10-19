@@ -1,13 +1,63 @@
 #' geoMatch
 #'
-#' A package designed to provide matched data for propensity-score based causal analyses using spatially-explicit data
+#' geoMatch improves models using spatial data for the purposes of causal inference by selecting matched subsets of the original treated and control groups.
+#' It provides an extension of the R package MatchIt (see Ho, Imai, King, and Stuart (2004)), enabling the use 
+#' of spatial data frames as well as providing an adjustment factor to mitigate potential spillover between 
+#' treated and control units (i.e., in cases where stable unit treatment value assumptions (SUTVA) may not be met
+#' due to spatial spillovers).  geoMatch maintains the full functionality of MatchIt, including all 
+#' matching strategies and caliper functions. Full documentation on MatchIt is available online at http://gking.harvard.edu/matchit, 
+#' and help for specific commands is available through help.matchit.
+#'
 #'
 #' @docType package
 #' @name geoMatch
 #' @export
 #' @import sp
 #' @import MatchIt
-geoMatch <- function (..., outcome.variable)
+#' @details
+#' geoMatch overcomes two challenges.  First, it seeks to first remove spillover from control outcome measures,
+#' for example a case where a clinic may improve health outcomes in both the geographic neighborhood
+#' it is located in, as well as nearby neighborhoods.  Failing to adjust for this spillover can result in
+#' erroneous estimates of impact. Second, it allows for the use of spatial points data frames in conjunction
+#' with the MatchIt matching framework.
+#' geoMatch returns an adjusted version of the outcome variable for each control case as specified by the user, 
+#' defined as Y*.  Y* can be interpreted as the estimated outcome if the spatial spillovers from treated
+#' cases are netted out. This adjusted Y* can be used in the second stage model for more accurate estimations of
+#' treatment effects.  Y* is calculated through a multiple step process.
+#' First, a distance matrix (Dct) is constructed which provides the Euclidean distances between each treated and control case:
+#' \code{
+#' [Dc1t1  Dc1t2   Dc1t3  .   Dc1tn]\n
+#' [  .      .       .    .     .  ]
+#' [  .      .       .    .     .  ]
+#' [Dcnt1  Dcnt2   Dcnt3  .   Dcntn]
+#' }
+#' \par Second, two vector (Yt and Yc) are constructed which contain the known, observed outcomes in both Yt and Yc.
+#' \par Third, a spherical distance decay function is fit for each T simultanesouly, in which the parameter Ut is 
+#' solved for across all units T in the spatial function sf(distance, U):
+#' (1 - [[3/2] * (Dct / Ut) - [1/2] * (Dct/Ut)^3])
+#' where we seek to optimize the absolute difference between the observed outcome at each control location (Yc) and the estimated
+#' outcome (Yc_e) as a product of neighboring units Yt:
+#' Yc_e =  sf(Dct, Ut) * Yt 
+#' minimize(abs(Yc_e-Yc))
+#' The vector of distances Ut is used to estimate the 
+#' adjusted Yc*, which - for each control case - provides an estimate of the outcome
+#' if spillover is removed:
+#' Yc* = Yc - (sf[Dct, Ut]*Yt).
+#' geoMatch then proceeds as usual with MatchIt, returning a matched set of spatial locations alongside Yc*.
+
+#'@param ... The first parameters provided to geoMatch should be a traditional MatchIt specification.  Full documentation on MatchIt is available online at http://gking.harvard.edu/matchit.
+#'@param data A spatial points dataframe.
+#'@param outcome.variable The name of the outcome variable that will be modeled to establish causal effect.  This must be an existing attribute in the spatial dataframe passed to geoMatch.
+#'@param outcome.suffix Suffix for the returned column name with spillover-adjusted outcome data.
+#'@param optim.iterations the number of iterations to perform within the spatial decay optimization procedure.
+#'@return This function will return a MatchIt object, with a spatial data frame accesible in $spdf.
+#'@example /demo/match.spatial.data.R
+#'@source \url{http://geo.aiddata.org/}
+#'@section References:
+#'Daniel Ho, Kosuke Imai, Gary King, and Elizabeth Stuart (2007). Matching as Nonparametric Preprocessing for Reducing Model Dependence in Parametric Causal Inference. Political Analysis 15(3): 199-236. http://gking.harvard.edu/files/abs/matchp-abs.shtml
+#'@section Authors:
+#'Dan Miller Runfola dan@danrunfola.com; Ariel BenYishay abenyishay@wm.edu
+geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted",optim.iterations=10000)
 {
   suppressMessages(require(MatchIt))
   suppressMessages(require(sp))
