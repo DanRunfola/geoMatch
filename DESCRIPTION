@@ -7,7 +7,6 @@ Description: A package designed to provide matched data for propensity-score bas
 License: Other
 Imports: MatchIt, sp
 Depends: R (>= 3.2.3)
-Enhances: MatchIt
 LazyData: true
 URL: https://github.com/itpir/geo.match
 BugReports: https://github.com/itpir/geo.match/issues

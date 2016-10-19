@@ -7,11 +7,10 @@
 #' @export
 #' @import sp
 #' @import MatchIt
-require(MatchIt)
-require(sp)
-
 geoMatch <- function (..., outcome.variable)
 {
+  require(MatchIt)
+  require(sp)
   spatial_match = -1
   a <- list(...)
   if (missing(outcome.variable) & isS4(a[['data']]))
