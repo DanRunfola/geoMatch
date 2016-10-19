@@ -1,0 +1,27 @@
+
+```{r, setup, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(
+  comment = "#>",
+  tidy = FALSE,
+  error = FALSE,
+  fig.width = 8,
+  fig.height = 8)
+```
+
+# geoMatch
+
+> geoMatch
+
+A package designed to provide matched data for propensity-score based causal analyses using spatially-explicit data
+
+## Installation
+
+## Usage
+
+```{r}
+library(geoMatch)
+```
+
+## License
+
+Other © 
