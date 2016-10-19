@@ -1,0 +1,14 @@
+citHeader("To cite geoMatch in publications, please cite MatchIt and:")
+
+citEntry(entry = "Misc",
+         title        = "{geoMatch}: An R Package for Spatial Propensity Score Matching.",
+         author       = personList(as.person("Daniel Runfola"),
+                                   as.person("Ariel BenYishay"),
+                                   as.person("Seth Goodman")),
+         year         = "2016",
+         url          = "http://geo.aiddata.org",
+         
+         textVersion  =
+           paste("Runfola, D., BenYishay, A., Goodman, S., 2016. geoMatch: An R Package for Spatial Propensity 
+           Score Matching. R package. http://geo.aiddata.org.")
+)

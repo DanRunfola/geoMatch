@@ -3,12 +3,13 @@ Title: geoMatch
 Version: 0.1.1
 Author: Dan Runfola
 Maintainer: Dan Runfola <dan@danrunfola.com>
-Description: A package designed to provide matched data for propensity-score based causal analyses using spatially-explicit data
-License: Other
+Description: geoMatch improves models using spatial data for the purposes of causal inference by (a) adjusting for spatial spillover effects, and (b) leveraging MatchIt to select matched subsets of spatially defined treated and control locations.
+License: MIT + file LICENSE
 Imports: MatchIt, sp
 Depends: R (>= 3.2.3)
 Suggests: spdep
 LazyData: true
+LazyLoad: yes
 URL: https://github.com/itpir/geo.match
 BugReports: https://github.com/itpir/geo.match/issues
 RoxygenNote: 5.0.1
