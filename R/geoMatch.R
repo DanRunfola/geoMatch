@@ -71,27 +71,27 @@ geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted",optim.ite
   spatial_match = -1
   a <- list(...)
   if (missing(outcome.variable) & isS4(a[['data']]))
+  {
+    warning("You are using a spatial dataframe, but did not assign a outcome.variable. This is required for spatial adjustments.  MatchIt will be performed ignoring spatial options.")
+    spatial_match = FALSE
+    if("data" %in% names(a))
     {
-      warning("You are using a spatial dataframe, but did not assign a outcome.variable. This is required for spatial adjustments.  MatchIt will be performed ignoring spatial options.")
-      spatial_match = FALSE
-      if("data" %in% names(a))
-      {
-        #Pass the data name forward for a cleaner summary
-        dName <- as.character(match.call()$data)
-      }
-      dfA <- as.data.frame(a[['data']]@data)
-      a[['data']] <- dfA
+      #Pass the data name forward for a cleaner summary
+      dName <- as.character(match.call()$data)
+    }
+    dfA <- as.data.frame(a[['data']]@data)
+    a[['data']] <- dfA
   }
   
   if(!missing(outcome.variable) & !isS4(a[['data']]) & spatial_match==-1)
-    {
+  {
     warning("You assigned an outcome variable, but your data is not a spatial data frame. A spatial data frame is required for spatial adjustments.  MatchIt will be performed ignoring spatial options.")
     spatial_match = FALSE  
     if("data" %in% names(a))
-      {
-        #Pass the data name forward for a cleaner summary
-        dName <- as.character(match.call()$data)
-      }
+    {
+      #Pass the data name forward for a cleaner summary
+      dName <- as.character(match.call()$data)
+    }
   }
   if(missing(outcome.variable) & !isS4(a[['data']]) & spatial_match==-1)
   {
@@ -103,8 +103,8 @@ geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted",optim.ite
       dName <- as.character(match.call()$data)
     }
     
-    }
-
+  }
+  
   if(spatial_match == FALSE)
   {
     m.out <- do.call("matchit", a)
@@ -116,7 +116,7 @@ geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted",optim.ite
   {
     x.coord <- coordinates(a[['data']])[,2]
     y.coord <- coordinates(a[['data']])[,1]
-
+    
     if(max(x.coord) > 180.0 | min(x.coord) < -180.0 | max(y.coord) > 90.0 | min(y.coord) < -90.0)
     {
       warning("geoMatch currently only supports data projected with latitude and longitude information (WGS84).  Please reproject your data.")
@@ -126,7 +126,8 @@ geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted",optim.ite
     if(class(a[['data']])[1] == "SpatialPointsDataFrame")
     {
       o_var <- outcome.variable
-      geoMatch.Core(..., outcome.variable = o_var)
+      iterations <- optim.iterations
+      geoMatch.Core(..., outcome.variable = o_var, optim.iterations = iterations) 
     }
     else
     {
@@ -141,6 +142,6 @@ geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted",optim.ite
   }
   
 }
-  
+
 
 
