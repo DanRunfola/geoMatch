@@ -1,5 +1,5 @@
 #Core functionality for the geoMatch MatchIt wrapper.
-geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted",optim.iterations=10000){
+geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   a <- list(...)
   
   #Remove spillover from all C outcomes, then matches.
@@ -59,6 +59,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted",opti
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
     Yc.spill.est <- rowSums(Yc.spill.est.genB)
     Yc.err = sum(abs(Yc - Yc.spill.est))
+    #Ineffecient approach to preventing negative distances
     return(Yc.err)
   }
   
@@ -75,31 +76,33 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted",opti
   #Optimize Ut vector, limiting distance threshold to be
   #greater than 0, and less than the circumfrence of the earth 
   #(Approx. 40,100 km)
-  #Use random starting points between 10 and 1000km; seed for replicability.
-  set.seed(427)
-  Ut <- runif(nrow(Yt),10000.0,1000000.0)
+  #Use random starting points between the minimum and maximum observed distances
+  #between C and T.
+  Ut <- runif(nrow(Yt),(min(Dct)+.00001),max(Dct))
+  #print(Ut)
+  m_init <- round(max(Dct)*4,0)
   Ut.optim <- 
-    optim(par = Ut, 
-        sf.opt, 
+    optimx(par = Ut, 
+        fn=sf.opt, 
         gr=NULL,
-        Dct,
-        method = "SANN",
-        #lower = 100, upper = 40100000,
-        control=c(trace=0, maxit=optim.iterations))
+        hess=NULL,
+        method = "spg",
+        lower = 0.01,
+        upper=m_init,
+        itnmax=100000,
+        #hessian=FALSE,
+        control=list(trace=0),
+        Dct)
   
-  if(Ut.optim$convergence != 0)
+  if(Ut.optim$convcode != 0)
   {
-    warning("No optimal spatial decay functions were found, so geoMatch is exiting.  
-            This could indicate limited spatial correlation exists in your data,
-            the spatial decay function you selected is not adequate for your data,
-            or the point pattern is otherwise too complex to solve using your settings.
-            Try selecting a different spatial decay function.")
-    return(0)
+    warning("No optimal spatial decay function was found, and the below message (if any) was returned by the optimization procedure.  geoMatch will attempt to continue with the best available parameters.")
+    warning(Ut.optim$message)
   }
-  else
-  {
-    Ut <- Ut.optim$par
-  }
+  
+
+    Ut <- Ut.optim[1:length(Ut)]
+
 
   #Calculate adjusted Yc*, which - for each C - removes spatial spillover.
   #Yc* = Yc - (sf[Dct, Ut]*Yt) [Note: Yt multiplier is applied in the function

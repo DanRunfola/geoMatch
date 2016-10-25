@@ -53,7 +53,6 @@
 #'@param ... The first parameters provided to geoMatch should be a traditional MatchIt specification.  Full documentation on MatchIt is available online at http://gking.harvard.edu/matchit. Dataframe must be a spatial points dataframe.
 #'@param outcome.variable The name of the outcome variable that will be modeled to establish causal effect.  This must be an existing attribute in the spatial dataframe passed to geoMatch.
 #'@param outcome.suffix Suffix for the returned column name with spillover-adjusted outcome data.
-#'@param optim.iterations the number of iterations to perform within the spatial decay optimization procedure.
 #'@return This function will return a MatchIt object, with a spatial data frame accesible in $spdf.
 #'@example /demo/match.spatial.data.R
 #'@source \url{http://geo.aiddata.org/}
@@ -66,7 +65,7 @@
 #'Daniel Ho, Kosuke Imai, Gary King, and Elizabeth Stuart (2007). Matching as Nonparametric Preprocessing for Reducing Model Dependence in Parametric Causal Inference. Political Analysis 15(3): 199-236. http://gking.harvard.edu/files/abs/matchp-abs.shtml
 #'}
 
-geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted",optim.iterations=10000)
+geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted")
 {
   spatial_match = -1
   a <- list(...)
@@ -126,8 +125,7 @@ geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted",optim.ite
     if(class(a[['data']])[1] == "SpatialPointsDataFrame")
     {
       o_var <- outcome.variable
-      iterations <- optim.iterations
-      geoMatch.Core(..., outcome.variable = o_var, optim.iterations = iterations) 
+      geoMatch.Core(..., outcome.variable = o_var) 
     }
     else
     {
