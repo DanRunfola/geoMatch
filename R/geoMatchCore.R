@@ -149,7 +149,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   
   spdfA$weights <- m.res$weights
   spdfA$matched <- m.res$weights>0
-  spdfA$distance <- m.res$distance
+  #spdfA$distance <- m.res$distance
   
   m.res$spdf <- spdfA
   
