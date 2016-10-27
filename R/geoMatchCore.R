@@ -139,7 +139,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   
   env <- attributes(terms(...))$.Environment
   
-  assign_to <- paste(m.res$call$data,"@data$",outcome.variable.adjusted,sep="")
+  assign_to <- paste(m.res$call$data,"$",outcome.variable.adjusted,sep="")
   assign_dta <- a[['data']][outcome.variable.adjusted]
   
   c.call <- paste(assign_to, "<-", assign_dta)
