@@ -1,7 +1,6 @@
 #Core functionality for the geoMatch MatchIt wrapper.
 geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   a <- list(...)
-  
   #Remove spillover from all C outcomes, then matches.
   #Mitigates OVB through PSM matching, but does not take
   #advantage of OVB back-extrapolation.
@@ -130,26 +129,9 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   a[['data']] <- dfA
   m.res <- do.call("matchit", a)
 
-  #Fix the data call to account for the do.match and (for now!) lack of substitute.
-  m.res$call$data <- as.list(substitute(list(...)))[-1L]$data
-  
-  #Update the source data with the new column.
-  #This is to play nice with MatchIt's match.data() call.
-  
-  env <- attributes(terms(...))$.Environment
-  
-  assign_to <- paste(m.res$call$data,"$",outcome.variable.adjusted,sep="")
-  assign_dta <- a[['data']][outcome.variable.adjusted]
-  
-  c.call <- paste(assign_to, "<-", assign_dta)
-  
-  eval(parse(text=c.call), envir = env)
-  assign(assign_to, assign_dta, envir=env, inherits=TRUE)
-
-  
-  spdfA$weights <- m.res$weights
-  spdfA$matched <- m.res$weights>0
-  #spdfA$distance <- m.res$distance
+  spdfA@data$weights <- m.res$weights
+  spdfA@data$matched <- m.res$weights>0
+  spdfA@data$distance <- m.res$distance
   
   m.res$spdf <- spdfA
   
