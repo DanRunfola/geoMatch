@@ -133,7 +133,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   #Fix the data call to account for the do.match and (for now!) lack of substitute.
   m.res$call$data <- as.list(substitute(list(...)))[-1L]$data
   print(class(m.res$call$data))
-  m.res$call$data <- m.res$call$data
+  m.res$call$data <- slot(m.res$call$data,"data")
   
   #Update the source data with the new column.
   #This is to play nice with MatchIt's match.data() call.
