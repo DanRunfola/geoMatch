@@ -92,12 +92,11 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
         #hessian=FALSE,
         control=list(trace=0),
         Dct)
-    m.res$optim = TRUE
+
   if(Ut.optim$convcode != 0)
   {
     warning("No optimal spatial decay function was found, which can indicate a lack of spatial autocorrelation or a highly complex system. Consider using the unadjusted estimate.")
     warning(Ut.optim$message)
-    m.res$optim = FALSE
   }
   
 
@@ -135,6 +134,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   spdfA@data$distance <- m.res$distance
   
   m.res$spdf <- spdfA
+  m.res$optim <- (Ut.optim$convcode == 0)
   
   return(m.res)
   
