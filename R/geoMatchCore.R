@@ -53,9 +53,9 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
 
   sf.opt <- function(Ut, ...)
   {
-    S <- Ut[length(Ut)]
-    Ut <- Ut[1:(length(Ut)-1)]
-    Yc.spill.est.genA = S * ((3/2) * (Dct / Ut) - (1/2) * (Dct/Ut)^3)
+    S <- runif(length(Ut)-1,Ut[length(Ut)])
+    D <- Ut[1:(length(Ut)-1)]
+    Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
     Yc.spill.est <- rowSums(Yc.spill.est.genB)
@@ -65,9 +65,9 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   
   sf <- function(...)
   {
-    S <- Ut[length(Ut)]
-    Ut <- Ut[1:(length(Ut)-1)]
-    Yc.spill.est.genA = S * ((3/2) * (Dct / Ut) - (1/2) * (Dct/Ut)^3)
+    S <- runif(length(Ut)-1,Ut[length(Ut)])
+    D <- Ut[1:(length(Ut)-1)]
+    Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
     Yc.spill.est <- rowSums(Yc.spill.est.genB)
