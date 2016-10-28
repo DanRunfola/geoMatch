@@ -53,8 +53,8 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
 
   sf.opt <- function(Ut, ...)
   {
-    S <- rep(Ut[length(Ut)],length(Ut)-1)
-    D <- Ut[1:(length(Ut)-1)]
+    S <- tail(Ut, length(Dct)) 
+    D <- Ut[1:(length(Ut)-length(Dct))]
     Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
@@ -65,8 +65,8 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   
   sf <- function(...)
   {
-    S <- rep(Ut[length(Ut)],length(Ut)-1)
-    D <- Ut[1:(length(Ut)-1)]
+    S <- tail(Ut, length(Dct)) 
+    D <- Ut[1:(length(Ut)-length(Dct))]
     Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
@@ -80,7 +80,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   #(Approx. 40,100 km)
   #Use random starting points between the minimum and maximum observed distances
   #between C and T.
-  Ut <- c(runif(nrow(Yt),(min(Dct)+.00001),max(Dct)),runif(1))
+  Ut <- c(runif(nrow(Yt),(min(Dct)+.00001),max(Dct)),runif(nrow(Yt),0,1))
   #print(Ut)
   m_init <- round(max(Dct)*4,0)
   Ut.optim <- 
