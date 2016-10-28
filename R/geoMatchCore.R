@@ -53,18 +53,17 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
 
   sf.opt <- function(Ut, ...)
   {
-    Yc.spill.est.genA = ((3/2) * (Dct / Ut) - (1/2) * (Dct/Ut)^3)
+    Yc.spill.est.genA = Ut[2] * ((3/2) * (Dct / Ut[1]) - (1/2) * (Dct/Ut[1])^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
     Yc.spill.est <- rowSums(Yc.spill.est.genB)
     Yc.err = sum(abs(Yc - Yc.spill.est))
-    #Ineffecient approach to preventing negative distances
     return(Yc.err)
   }
   
   sf <- function(...)
   {
-    Yc.spill.est.genA = ((3/2) * (Dct / Ut) - (1/2) * (Dct/Ut)^3)
+    Yc.spill.est.genA = Ut[2] * ((3/2) * (Dct / Ut[1]) - (1/2) * (Dct/Ut[1])^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
     Yc.spill.est <- rowSums(Yc.spill.est.genB)
@@ -77,7 +76,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   #(Approx. 40,100 km)
   #Use random starting points between the minimum and maximum observed distances
   #between C and T.
-  Ut <- runif(nrow(Yt),(min(Dct)+.00001),max(Dct))
+  UT <- list(runif(nrow(Yt),(min(Dct)+.00001),max(Dct)),runif(1))
   #print(Ut)
   m_init <- round(max(Dct)*4,0)
   Ut.optim <- 
@@ -100,15 +99,16 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   }
   
 
-    Ut <- Ut.optim[1:length(Ut)]
+    Ut <- Ut.optim[1:length(Ut[1])]
 
 
   #Calculate adjusted Yc*, which - for each C - removes spatial spillover.
   #Yc* = Yc - (sf[Dct, Ut]*Yt) [Note: Yt multiplier is applied in the function
   #to make this code easier to read].
-  
-  Yc.star <- Yc - sf(Dct, Ut)
+    
   spillovers_c <- sf(Dct, Ut)
+  Yc.star <- Yc - spillovers_c
+  
 
   
   #Update the original outcome values to remove spillover.
