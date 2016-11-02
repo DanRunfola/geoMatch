@@ -8,7 +8,7 @@ A package designed to provide matched data for propensity-score based causal ana
 ## Installation
 ```r
 library(devtools)
-install.github("itpir/geoMatch")
+install_github("itpir/geoMatch")
 ```
 geoMatch imports both the sp and MatchIt packages.
 
