@@ -53,6 +53,8 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
 
   sf.opt <- function(Ut, ...)
   {
+    print(Dct)
+    print(Ut)
     S <- tail(Ut, length(Dct)) 
     print(S)
     D <- Ut[1:(length(Ut)-length(Dct))]
@@ -84,10 +86,8 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   #between C and T.
   Ut <- runif(nrow(Yt)*2,(min(Dct)+.00001),max(Dct))
   sf.opt(Ut)
-  #print(Ut)
   m_init <- max(Dct)*4
-  print(Ut)
-  print(m_init)
+
   Ut.optim <- 
     optimx(par = Ut, 
         fn=sf.opt, 
