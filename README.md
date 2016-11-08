@@ -6,7 +6,10 @@
 A package designed to provide matched data for propensity-score based causal analyses using spatially-explicit data.  Fully compatible with matching strategies available in the MatchIt package, geoMatch provides adjusted outcome measures which mitigate bias associated with spillover from areas which received interventions to proximate areas that did not.
 
 ## Installation
-install.packages("geoMatch")
+```r
+library(devtools)
+install_github("itpir/geoMatch")
+```
 geoMatch imports both the sp and MatchIt packages.
 
 ## Usage
