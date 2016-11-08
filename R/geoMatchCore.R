@@ -54,7 +54,9 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   sf.opt <- function(Ut, ...)
   {
     S <- tail(Ut, length(Dct[[1]])) 
+    print(length(S))
     D <- Ut[1:(length(Ut)-length(Dct[[1]]))]
+    print(length(D))
     Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
@@ -103,12 +105,11 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
     warning(Ut.optim$message)
   }
   
-    print(Ut.optim)
+
 
     Ut <- Ut.optim[1:length(Ut)]
     
-    print(Ut)
-    break
+
 
   #Calculate adjusted Yc*, which - for each C - removes spatial spillover.
   #Yc* = Yc - (sf[Dct, Ut]*Yt) [Note: Yt multiplier is applied in the function
