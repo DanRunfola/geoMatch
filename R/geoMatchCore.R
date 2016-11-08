@@ -106,7 +106,9 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
     print(Ut.optim)
 
     Ut <- Ut.optim[1:length(Ut)]
-
+    
+    print(Ut)
+    break
 
   #Calculate adjusted Yc*, which - for each C - removes spatial spillover.
   #Yc* = Yc - (sf[Dct, Ut]*Yt) [Note: Yt multiplier is applied in the function
