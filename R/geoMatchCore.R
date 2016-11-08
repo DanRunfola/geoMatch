@@ -103,6 +103,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
     warning(Ut.optim$message)
   }
   
+    print(Ut.optim)
 
     Ut <- Ut.optim[1:length(Ut)]
 
@@ -111,7 +112,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   #Yc* = Yc - (sf[Dct, Ut]*Yt) [Note: Yt multiplier is applied in the function
   #to make this code easier to read].
     
-  spillovers_c <- sf(Dct, Ut)
+  spillovers_c <- sf(Ut, Dct)
   Yc.star <- Yc - spillovers_c
   
 
