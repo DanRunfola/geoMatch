@@ -53,11 +53,9 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
 
   sf.opt <- function(Ut, ...)
   {
-    print(Dct)
-    print(Ut)
-    S <- tail(Ut, length(Dct)) 
+    S <- tail(Ut, length(Dct[[1]])) 
     print(S)
-    D <- Ut[1:(length(Ut)-length(Dct))]
+    D <- Ut[1:(length(Ut)-length(Dct[[1]]))]
     print(D)
     Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
