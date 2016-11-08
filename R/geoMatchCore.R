@@ -83,6 +83,8 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   Ut <- runif(nrow(Yt)*2,(min(Dct)+.00001),max(Dct))
   #print(Ut)
   m_init <- max(Dct)*4
+  print(Ut)
+  print(m_init)
   Ut.optim <- 
     optimx(par = Ut, 
         fn=sf.opt, 
