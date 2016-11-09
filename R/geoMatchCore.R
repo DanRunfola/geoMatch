@@ -94,7 +94,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
         upper=m_init,
         itnmax=100000,
         #hessian=FALSE,
-        control=list(trace=2),
+        control=list(trace=0),
         Dct)
 
   if(Ut.optim$convcode != 0)
@@ -114,7 +114,9 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   #to make this code easier to read].
     
   spillovers_c <- sf(Ut, Dct)
+  print(spillovers_c)
   Yc.star <- Yc - spillovers_c
+  print(Yc.star)
   
 
   
