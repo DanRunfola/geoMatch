@@ -94,7 +94,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
         upper=m_init,
         itnmax=100000,
         #hessian=FALSE,
-        control=list(trace=0),
+        control=list(trace=1),
         Dct)
 
   if(Ut.optim$convcode != 0)
@@ -112,10 +112,13 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   #Calculate adjusted Yc*, which - for each C - removes spatial spillover.
   #Yc* = Yc - (sf[Dct, Ut]*Yt) [Note: Yt multiplier is applied in the function
   #to make this code easier to read].
-    
+  print("Ut:")
+  print(Ut)
   spillovers_c <- sf(Ut, Dct)
+  print("SC:")
   print(spillovers_c)
   Yc.star <- Yc - spillovers_c
+  print("Ystar")
   print(Yc.star)
   
 
