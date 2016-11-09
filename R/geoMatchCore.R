@@ -94,7 +94,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
         upper=m_init,
         itnmax=100000,
         #hessian=FALSE,
-        control=list(trace=0),
+        control=list(trace=2),
         Dct)
 
   if(Ut.optim$convcode != 0)
