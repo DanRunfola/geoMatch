@@ -65,7 +65,7 @@
 #'Daniel Ho, Kosuke Imai, Gary King, and Elizabeth Stuart (2007). Matching as Nonparametric Preprocessing for Reducing Model Dependence in Parametric Causal Inference. Political Analysis 15(3): 199-236. http://gking.harvard.edu/files/abs/matchp-abs.shtml
 #'}
 
-geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted")
+geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted", m.it = 10000)
 {
   spatial_match = -1
   a <- list(...)
@@ -125,7 +125,7 @@ geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted")
     if(class(a[['data']])[1] == "SpatialPointsDataFrame")
     {
       o_var <- outcome.variable
-      geoMatch.Core(..., outcome.variable = o_var) 
+      geoMatch.Core(..., outcome.variable = o_var, m.it) 
     }
     else
     {

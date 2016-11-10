@@ -1,5 +1,5 @@
 #Core functionality for the geoMatch MatchIt wrapper.
-geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
+geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.it = 10000){
   a <- list(...)
   #Remove spillover from all C outcomes, then matches.
   #Mitigates OVB through PSM matching, but does not take
@@ -85,6 +85,11 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   Ut <- runif(nrow(Yt)*2,(min(Dct)+.00001),max(Dct))
   Ut[((length(Ut)/2)+1):length(Ut)] <- runif((length(Ut)/2),0,1)
   m_init <- max(Dct)*4
+  
+  #Parameter scaling vectors
+  p.scale <- Ut
+  p.scale[1:(length(Ut)/2)] <- max(Ut[1:(length(Ut)/2)])
+  p.scale[((length(Ut)/2)+1):length(Ut)] <- 1
 
   Ut.optim <- 
     optimx(par = Ut, 
@@ -94,9 +99,9 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
         method = "spg",
         lower = 0.000000000001,
         upper=m_init,
-        itnmax=1000000000,
+        itnmax=m.it,
         #hessian=FALSE,
-        control=list(trace=0),
+        control=list(trace=0, maxit=m.it, parscale = p.scale),
         Dct)
 
   if(Ut.optim$convcode != 0)
