@@ -84,29 +84,38 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   #between C and T.
   Ut <- runif(nrow(Yt)*2,(min(Dct)+.00001),max(Dct))
   Ut[((length(Ut)/2)+1):length(Ut)] <- runif((length(Ut)/2),0,1)
-  m_init <- max(Dct)*4
+  m_init <- max(Dct)*10
 
 
   Ut.optim <- 
-    optimx(par = Ut, 
-        fn=sf.opt, 
-        gr=NULL,
-        hess=NULL,
-        method = "spg",
-        lower = 0.000000000001,
-        upper=m_init,
-        itnmax=m.it,
-        #hessian=FALSE,
-        control=list(trace=1, parscale=c(1e3,1e-4)),
-        Dct)
-
+    spg(par = Ut,
+        gn = sf.opt,
+        gr = NULL,
+        method = 3,
+        lower = 0.00000000001,
+        upper = m_init,
+        project = NULL,
+        projectArgs = NULL,
+        control=list(parscale=c(100,.001)))
+    #optimx(par = Ut, 
+        #fn=sf.opt, 
+        #gr=NULL,
+        #hess=NULL,
+        #method = "spg",
+        #lower = 0.000000000001,
+        #upper=m_init,
+        #itnmax=m.it,
+        ##hessian=FALSE,
+        #control=list(trace=1, parscale=c(1e3,1e-4)),
+        #Dct)
+  print(Ut.optim)
   if(Ut.optim$convcode != 0)
   {
     warning("No optimal spatial decay function was found, which can indicate a lack of spatial autocorrelation or a highly complex system. Consider using the unadjusted estimate.")
     warning(Ut.optim$message)
   }
   
-  print(Ut.optim)
+
 
     Ut <- Ut.optim[1:length(Ut)]
   
