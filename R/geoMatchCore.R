@@ -88,9 +88,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   #Use random starting points between the minimum and maximum observed distances
   #between C and T.
   Ut <- runif(nrow(Yt)*2,(min(Dct)+.00001),max(Dct))
-  print(length(Yt))
-  print(length(Ut))
-  print("--")
+  Ut[((length(Ut)/2)+1):length(Ut)] <- runif((length(Ut)/2),0,1)
   m_init <- max(Dct)*4
 
   Ut.optim <- 
