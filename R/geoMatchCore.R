@@ -54,7 +54,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   sf.opt <- function(Ut, ...)
   {
     S <- tail(Ut, length(Ut)/2) 
-    D <- Ut[1:length(S)] * p.scale
+    D <- Ut[1:length(S)] * ltyp.scale
     Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
@@ -66,12 +66,10 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   sf <- function(...)
   {
     S <- tail(Ut, length(Ut)/2) 
-    D <- Ut[1:length(S)] * p.scale
+    D <- Ut[1:length(S)] * ltyp.scale
     Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
-    print("Inside sf Tv:")
-    print(Yc.spill.est.genB)
     Yc.spill.est <- rowSums(Yc.spill.est.genB)
     return(Yc.spill.est)
   }
@@ -82,36 +80,32 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   #(Approx. 40,100 km)
   #Use random starting points between the minimum and maximum observed distances
   #between C and T.
-  Ut <- runif(nrow(Yt)*2,.001,1)
-  m_init <- max(Dct)*4
+  Ut <- runif(nrow(Yt)*2,.1,1)
+  high_init <- runif(nrow(Yt)*2,4.0,4.0) #Maximum decay relative to largest distance observed.
+  low_init <- runif(nrow(Yt)*2,.00001,.00001) 
   
   #Parameter scaling
-  p.scale <- max(Dct)
+  ltyp.scale <- max(Dct)
 
   Ut.optim <- 
     spg(par = Ut, 
         fn=sf.opt, 
         gr=NULL,
-        lower = 0.000000000001,
-        upper=m_init,
-        control=list(trace=0, maxit = m.it),
-        Dct,
-        p.scale)
-
-  print(Ut.optim)
+        #lower = high_init,
+        #upper= low_init,
+        control=list(trace=FALSE, maxit = m.it),
+        Dct = Dct,
+        ltyp.scale = ltyp.scale)
   
-  if(Ut.optim$convcode != 0)
+  if(Ut.optim$convergence != 0)
   {
     warning("No optimal spatial decay function was found, which can indicate a lack of spatial autocorrelation or a highly complex system. Consider using the unadjusted estimate.")
     warning(Ut.optim$message)
   }
   
-  print(Ut.optim)
 
-    Ut <- Ut.optim[1:length(Ut)]
-  
-  print("Ut:")  
-  print(Ut)
+    Ut <- Ut.optim$par
+    
   
 
   #Calculate adjusted Yc*, which - for each C - removes spatial spillover.
