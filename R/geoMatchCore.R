@@ -103,8 +103,8 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
     spg(par = Ut, 
         fn=sf.opt, 
         gr=NULL,
-        lower = high_init,
-        upper= low_init,
+        lower = .001,
+        upper= 10,
         control=list(trace=t, maxit = m.it),
         Dct = Dct,
         quiet = q,
@@ -116,7 +116,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
     warning(Ut.optim$message)
   }
   
-
+  print(Ut.optim)
     Ut <- Ut.optim$par
     
   
