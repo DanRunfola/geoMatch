@@ -1,5 +1,5 @@
 #Core functionality for the geoMatch MatchIt wrapper.
-geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.it = 10000, verb = FALSE){
+geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.it = 10000, v = FALSE){
   a <- list(...)
   #Remove spillover from all C outcomes, then matches.
   #Mitigates OVB through PSM matching, but does not take
@@ -96,7 +96,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
         #upper= low_init,
         control=list(trace=FALSE, maxit = m.it),
         Dct = Dct,
-        quiet = verb,
+        quiet = v,
         ltyp.scale = ltyp.scale)
   
   if(Ut.optim$convergence != 0)
