@@ -70,7 +70,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
     Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
-    print("Spill est:")
+    print("Inside sf Tv:")
     print(Yc.spill.est.genB)
     Yc.spill.est <- rowSums(Yc.spill.est.genB)
     return(Yc.spill.est)
@@ -89,19 +89,17 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   p.scale <- max(Dct)
 
   Ut.optim <- 
-    optimx(par = Ut, 
+    spg(par = Ut, 
         fn=sf.opt, 
         gr=NULL,
-        hess=NULL,
-        method = "spg",
         lower = 0.000000000001,
         upper=m_init,
-        itnmax=m.it,
-        #hessian=FALSE,
-        control=list(trace=1),
+        control=list(trace=0, maxit = m.it),
         Dct,
         p.scale)
 
+  print(Ut.optim)
+  
   if(Ut.optim$convcode != 0)
   {
     warning("No optimal spatial decay function was found, which can indicate a lack of spatial autocorrelation or a highly complex system. Consider using the unadjusted estimate.")
@@ -119,7 +117,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   #Calculate adjusted Yc*, which - for each C - removes spatial spillover.
   #Yc* = Yc - (sf[Dct, Ut]*Yt) [Note: Yt multiplier is applied in the function
   #to make this code easier to read].
-  spillovers_c <- sf(Ut, Dct)
+  spillovers_c <- sf(Ut, Dct, p.scale)
   print("SC:")
   print(spillovers_c)
   Yc.star <- Yc - spillovers_c
