@@ -92,13 +92,11 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   {
     q <- FALSE
     t <- TRUE
-    tr <- 100
   }
   else
   {
     q <- TRUE
     t <- FALSE
-    tr <- 10
   }
   
   Ut.optim <- 
@@ -107,7 +105,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
         gr=NULL,
         #lower = high_init,
         #upper= low_init,
-        control=list(trace=t, triter = tr, maxit = m.it),
+        control=list(trace=t, maxit = m.it),
         Dct = Dct,
         quiet = q,
         ltyp.scale = ltyp.scale)
