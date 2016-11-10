@@ -54,7 +54,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   sf.opt <- function(Ut, ...)
   {
     S <- tail(Ut, length(Ut)/2) 
-    D <- Ut[1:length(S)]
+    D <- Ut[1:length(S)] * p.scale
     Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
@@ -66,7 +66,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   sf <- function(...)
   {
     S <- tail(Ut, length(Ut)/2) 
-    D <- Ut[1:length(S)]
+    D <- Ut[1:length(S)] * p.scale
     Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
@@ -82,17 +82,11 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   #(Approx. 40,100 km)
   #Use random starting points between the minimum and maximum observed distances
   #between C and T.
-  Ut <- runif(nrow(Yt)*2,(min(Dct)+.00001),max(Dct))
-  Ut[((length(Ut)/2)+1):length(Ut)] <- runif((length(Ut)/2),0,1)
+  Ut <- runif(nrow(Yt)*2,(.001),0)
   m_init <- max(Dct)*4
   
-  #Parameter scaling vectors
-  p.scale <- Ut
-  p.scale[1:(length(Ut)/2)] <- 1e3
-  p.scale[((length(Ut)/2)+1):length(Ut)] <- 1e-3
-  
-  print("p")
-  print(p.scale)
+  #Parameter scaling
+  p.scale <- max(Dct)
 
   Ut.optim <- 
     optimx(par = Ut, 
@@ -104,8 +98,9 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
         upper=m_init,
         itnmax=m.it,
         #hessian=FALSE,
-        control=list(trace=1, parscale = p.scale),
-        Dct)
+        control=list(trace=1),
+        Dct,
+        p.scale)
 
   if(Ut.optim$convcode != 0)
   {
