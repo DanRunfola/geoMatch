@@ -82,7 +82,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   #(Approx. 40,100 km)
   #Use random starting points between the minimum and maximum observed distances
   #between C and T.
-  Ut <- runif(nrow(Yt)*2,(.001),0)
+  Ut <- runif(nrow(Yt)*2,.001,1)
   m_init <- max(Dct)*4
   
   #Parameter scaling
