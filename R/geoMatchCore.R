@@ -103,7 +103,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
     spg(par = Ut, 
         fn=sf.opt, 
         gr=NULL,
-        lower = .0000000000001,
+        lower = .00000000000000000001,
         ftol = .00001,
         upper= 10,
         control=list(trace=t, maxit = m.it, checkGrad = FALSE, M=20),
