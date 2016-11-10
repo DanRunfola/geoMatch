@@ -90,6 +90,9 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   p.scale <- Ut
   p.scale[1:(length(Ut)/2)] <- max(Ut[1:(length(Ut)/2)])
   p.scale[((length(Ut)/2)+1):length(Ut)] <- 1
+  
+  print("p")
+  print(p.scale)
 
   Ut.optim <- 
     optimx(par = Ut, 
@@ -101,7 +104,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
         upper=m_init,
         itnmax=m.it,
         #hessian=FALSE,
-        control=list(trace=0, maxit=m.it, parscale = p.scale),
+        control=list(trace=0, parscale = p.scale),
         Dct)
 
   if(Ut.optim$convcode != 0)
