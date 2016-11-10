@@ -104,9 +104,9 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
         fn=sf.opt, 
         gr=NULL,
         lower = .00000000000000000001,
-        ftol = .001,
+        ftol = .00001,
         upper= 10,
-        control=list(trace=t, maxit = m.it, checkGrad = FALSE, M=20),
+        control=list(trace=t, maxit = m.it, checkGrad = FALSE, M=15),
         Dct = Dct,
         quiet = q,
         ltyp.scale = ltyp.scale)
