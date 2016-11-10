@@ -102,7 +102,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
         method = "spg",
         lower = 0.00000000000000000000000000000001,
         upper=m_init,
-        itnmax=100000,
+        itnmax=10,
         #hessian=FALSE,
         control=list(trace=0),
         Dct)
