@@ -154,7 +154,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   spdfA@data$distance <- m.res$distance
   
   m.res$spdf <- spdfA
-  m.res$optim <- (Ut.optim$convcode == 0)
+  m.res$optim <- (Ut.optim$convergence == 0)
   
   return(m.res)
   
