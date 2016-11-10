@@ -50,9 +50,14 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   
   #Solve for Ut in Yc =  sf(Dct, Ut) * Yt + ec
   
-
+  i <- 0
   sf.opt <- function(Ut, ...)
   {
+    if(v == TRUE)
+    {
+      print(i)
+      i = i + 1
+    }
     S <- tail(Ut, length(Ut)/2) 
     D <- Ut[1:length(S)] * ltyp.scale
     Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
@@ -89,11 +94,11 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
 
   if(v == TRUE)
   {
-    v <- FALSE
+    q <- FALSE
   }
   else
   {
-    v <- TRUE
+    q <- TRUE
   }
   
   Ut.optim <- 
@@ -104,7 +109,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
         #upper= low_init,
         control=list(trace=FALSE, maxit = m.it),
         Dct = Dct,
-        quiet = v,
+        quiet = q,
         ltyp.scale = ltyp.scale)
   
   if(Ut.optim$convergence != 0)
