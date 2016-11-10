@@ -55,10 +55,18 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   {
     S <- tail(Ut, length(Ut)/2) 
     D <- Ut[1:length(S)]
+    print("S in SF:")
+    print(S)
+    print("D in SF:")
+    print(D)
     Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
+    print("spill estimate:")
+    print(Yc.spill.est.genA)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
     Yc.spill.est <- rowSums(Yc.spill.est.genB)
+    print("total spill ests:")
+    print(Yc.spill.est)
     Yc.err = sum(abs(Yc - Yc.spill.est))
     return(Yc.err)
   }
@@ -67,10 +75,6 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
   {
     S <- tail(Ut, length(Ut)/2) 
     D <- Ut[1:length(S)]
-    print("S in SF:")
-    print(S)
-    print("D in SF:")
-    print(D)
     Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
@@ -100,7 +104,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
         upper=m_init,
         itnmax=100000,
         #hessian=FALSE,
-        control=list(trace=1),
+        control=list(trace=0),
         Dct)
 
   if(Ut.optim$convcode != 0)
