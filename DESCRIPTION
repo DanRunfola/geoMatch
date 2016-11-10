@@ -5,7 +5,7 @@ Author: Dan Runfola  <dan@danrunfola.com>, Ariel BenYishay <abenyishay@wm.edu>, 
 Maintainer: Dan Runfola <dan@danrunfola.com>
 Description: geoMatch improves models using spatial data for the purposes of causal inference by (a) adjusting for spatial spillover effects, and (b) leveraging MatchIt to select matched subsets of spatially defined treated and control locations.
 License: MIT + file LICENSE
-Imports: sp, BB
+Imports: sp, optimx
 Depends: R (>= 3.0.1), MatchIt
 Suggests: spdep
 LazyData: true
