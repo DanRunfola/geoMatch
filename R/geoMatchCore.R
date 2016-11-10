@@ -87,7 +87,15 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   #Parameter scaling
   ltyp.scale <- max(Dct)
 
-
+  if(v == TRUE)
+  {
+    v <- FALSE
+  }
+  else
+  {
+    v <- TRUE
+  }
+  
   Ut.optim <- 
     spg(par = Ut, 
         fn=sf.opt, 
