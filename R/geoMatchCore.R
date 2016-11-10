@@ -66,6 +66,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted"){
     print("total spill ests:")
     print(Yc.spill.est)
     Yc.err = sum(abs(Yc - Yc.spill.est))
+    break
     return(Yc.err)
   }
   
