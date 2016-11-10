@@ -103,8 +103,8 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
     spg(par = Ut, 
         fn=sf.opt, 
         gr=NULL,
-        #lower = high_init,
-        #upper= low_init,
+        lower = high_init,
+        upper= low_init,
         control=list(trace=t, maxit = m.it),
         Dct = Dct,
         quiet = q,
@@ -125,8 +125,6 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   #Yc* = Yc - (sf[Dct, Ut]*Yt) [Note: Yt multiplier is applied in the function
   #to make this code easier to read].
   spillovers_c <- sf(Ut, Dct, p.scale)
-  print("SC:")
-  print(spillovers_c)
   Yc.star <- Yc - spillovers_c
   
 
