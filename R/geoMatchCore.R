@@ -143,7 +143,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
 
   prediction.results <- lm(pred.str, data=a[['data']]@data)
 
-  variance.explained <- summary(lm(vec ~vec2))[8]
+  variance.explained <- summary(prediction.results)[8]
   
   #Multiplier - 0 would indicate all variance was explained by betas.
   #1 indicates none was.
