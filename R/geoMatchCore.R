@@ -70,8 +70,10 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
     D <- Ut[1:length(S)] * ltyp.scale
     Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
-    Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
-    Yc.spill.est <- rowSums(Yc.spill.est.genB)
+    #Adjustment for covariate-explained potential decays
+    Yc.spill.est.genB <- Yc.spill.est.genA * (1-Bct)
+    Yc.spill.est.genC <- sweep(Yc.spill.est.genB,MARGIN=2,Yt[[1]],'*')
+    Yc.spill.est <- rowSums(Yc.spill.est.genC)
     return(Yc.spill.est)
   }
   
@@ -120,68 +122,117 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
 
     Ut <- Ut.optim$par
     
+  #We can now produce a vector of the total maximum amount
+  #that could be explained by T spillovers, based on the spatial location of
+  #and outcome measures of each control and treated location.
   
-
-  #Calculate adjusted Yc*, which - for each C - removes spatial spillover.
-  #Yc* = Yc - (sf[Dct, Ut]*Yt) [Note: Yt multiplier is applied in the function
-  #to make this code easier to read].
-  spillovers_c <- sf(Ut, Dct, p.scale)
+  #However, this can include two different sources:
+  #(A) Spillover from the treatment unit itself
+  #(B) Spatially autocorrelated influences on Y from autocorrelated Beta variables.
   
-  #Adjsut spillovers to account for spillover that could be explained by
-  #covariate information.
-  #This is a very conservative approach to overcoming potential bias due to
-  #y = 1*B + 0 * C, where B is highly spatially autocorrelated.
-  #Further, if omitted variables are correlated with ancillary data,
-  #this additionally mitigates potential OVB (when taken in conjunction
-  #with the spillover adjustments).
+  #In order to accurately estimate a Y value that accounts for spillover,
+  #We must now estimate the second source.
   
-  #A predictive model is fit to account for this 
-  a[['data']]@data["est_max_spillovers"] <- 0
-  a[['data']]@data[a[['data']]@data[t.name]==0,]["est_max_spillovers"] <- spillovers_c
-  x.var.str <- strsplit(as.character(a[[1]]), "~")[3]
-  pred.str <- paste("est_max_spillovers", "~", x.var.str)
-
-  prediction.results <- lm(pred.str, data=a[['data']]@data)
-
-  variance.explained <- as.numeric(summary(prediction.results)[8])
+  #To do this, we adopt a highly conservative approach (that is more likely to lead to)
+  #under-, rather than over-, estimates of T.
   
-  #Multiplier - 0 would indicate all variance was explained by betas.
-  #1 indicates none was.
-  prop.exp <- (1 - variance.explained)
+  #First, we calculate the rate at which each specified X variable can explain
+  #itself over varying distances (correlogram).
   
-  #Covariate-weighted adjustement.
-  #Variance estimates could be weighted for individual observations eventually.
-  Yc.star <- Yc - (spillovers_c * prop.exp)
+    x.var.str <- strsplit(as.character(a[[1]]), "~")[3]
+    x.var.vec <- strsplit(as.character(x.var.str), "+")
+    
+    lat.vals <- coordinates(a[['data']])[,2]
+    lon.vals <- coordinates(a[['data']])[,1]
+    
+    correlogs <- list()
+    
+    inc = (mean(Dct) / 20) * 2 #Roughly equal number (10) of bins on either side of the mean.
+    
+    for(x.var.id in 1:length(x.var.vec))
+    {
+      cur.x <- x.var.vec[x.var.id][[1]]
+      cLog <- correlog(lon.vals, lat.vals, a[['data']]@data[cur.x][[1]], 
+                                      na.rm=T, latlon=T, increment = inc, quiet=TRUE,
+                                      resamp=100)
+      correlogs[[x.var.id]] <- as.vector(cLog$correlation)
+    }
   
-
+    #Second, for each Dct we identify the maximum correlogram value
+    #Across all X variables.  This represents - from the available data -
+    #An estimate of the maximum possible similarity due to 
+    #other driving covariates.
+    
+    dist.B <- function(Dct, correlogs, binsize)
+    {
+      max.dist.vec <- list()
+      for(p in 1:length(correlogs))
+      {
+        for(b in 1:length(correlogs[[1]]))
+        {
+          if(p == 1)
+          {
+            max.dist.vec[b] <- abs(correlogs[[1]][b])
+          }
+          else
+          {
+            max.dist.vec[b] <- max(abs(max.dist.vec[b]), abs(correlogs[[p]][b]))
+          }
+        }
+      }
+      
+      dist.vec <- binsize * as.vector(1:b)
+     return(apply(Dct, c(1,2),  
+           FUN=function(x,dist.v,max.dist.v) max.dist.v[which(abs(dist.v-x)==min(abs(dist.v-x)))][[1]], 
+           dist.v = dist.vec, max.dist.v = max.dist.vec))
+      
+    }
+    
+    Bct <- dist.B(Dct, correlogs, inc)
+      
+    #Finally, we calculate a vector of estimated spillovers for treated cases
+    #to use in our adjustment of Y.
+    
+    #Calculate adjusted Yc*, which - for each C - removes spatial spillover.
+    #Yc* = Yc - (sf[Dct, Ut]*Yt) [Note: Yt multiplier is applied in the function
+    #to make this code easier to read].
+      
+    spillovers_c <- sf(Ut, Dct, p.scale, Bct)
   
-  #Update the original outcome values to remove spillover.
-  outcome.variable.adjusted <- paste(outcome.variable,outcome.suffix,sep="")
-  a[['data']]@data[outcome.variable.adjusted] <- a[['data']]@data[outcome.variable]
-  a[['data']]@data[a[['data']]@data[t.name]==0,][outcome.variable.adjusted] <- Yc.star
+    
+    #Covariate-weighted adjustement.
+    #Variance estimates could be weighted for individual observations eventually.
+    Yc.star <- Yc - spillovers_c
+    
   
-  #Object with pre- and post statistics.
-  pre.post.spatial <- 
-    c(summary(a[['data']]@data[a[['data']]@data[t.name]==0,][outcome.variable]),
-      summary(a[['data']]@data[a[['data']]@data[t.name]==0,][outcome.variable.adjusted]))
+    
+    #Update the original outcome values to remove spillover.
+    outcome.variable.adjusted <- paste(outcome.variable,outcome.suffix,sep="")
+    a[['data']]@data[outcome.variable.adjusted] <- a[['data']]@data[outcome.variable]
+    a[['data']]@data[a[['data']]@data[t.name]==0,][outcome.variable.adjusted] <- Yc.star
+    
+    #Object with pre- and post statistics.
+    pre.post.spatial <- 
+      c(summary(a[['data']]@data[a[['data']]@data[t.name]==0,][outcome.variable]),
+        summary(a[['data']]@data[a[['data']]@data[t.name]==0,][outcome.variable.adjusted]))
+    
+    #Run matchIt as usual for the user.
+    spdfA <- a[['data']]
+    dfA <- as.data.frame(a[['data']]@data)
+    a[['data']] <- dfA
+    m.res <- do.call("matchit", a)
   
-  #Run matchIt as usual for the user.
-  spdfA <- a[['data']]
-  dfA <- as.data.frame(a[['data']]@data)
-  a[['data']] <- dfA
-  m.res <- do.call("matchit", a)
-
-  spdfA@data$weights <- m.res$weights
-  spdfA@data$matched <- m.res$weights>0
-  spdfA@data$distance <- m.res$distance
-  
-  m.res$spdf <- spdfA
-  m.res$optim <- (Ut.optim$convergence == 0)
-  
-  return(m.res)
-  
-  #These adjusted values can then be used in a traditional matchIt.
-  
-  
+    spdfA@data$weights <- m.res$weights
+    spdfA@data$matched <- m.res$weights>0
+    spdfA@data$distance <- m.res$distance
+    
+    m.res$spdf <- spdfA
+    m.res$optim <- (Ut.optim$convergence == 0)
+    
+    return(m.res)
+    
+    #These adjusted values can then be used in a traditional matchIt.
+    
+    
 
 }
