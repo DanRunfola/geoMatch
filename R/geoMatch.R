@@ -14,6 +14,8 @@
 #' @export
 #' @import sp
 #' @import MatchIt
+#' @import BB
+#' @import rpart
 #' @details
 #' geoMatch overcomes two challenges.  First, it seeks to first remove spillover from control outcome measures,
 #' for example a case where a clinic may improve health outcomes in both the geographic neighborhood

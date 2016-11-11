@@ -117,7 +117,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
     warning(Ut.optim$message)
   }
   
-  print(Ut.optim)
+
     Ut <- Ut.optim$par
     
   
@@ -126,7 +126,40 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   #Yc* = Yc - (sf[Dct, Ut]*Yt) [Note: Yt multiplier is applied in the function
   #to make this code easier to read].
   spillovers_c <- sf(Ut, Dct, p.scale)
-  Yc.star <- Yc - spillovers_c
+  
+  #Adjsut spillovers to account for spillover that could be explained by
+  #covariate information.
+  #This is a very conservative approach to overcoming potential bias due to
+  #y = 1*B + 0 * C, where B is highly spatially autocorrelated.
+  #Further, if omitted variables are correlated with ancillary data,
+  #this additionally mitigates potential OVB (when taken in conjunction
+  #with the spillover adjustments).
+  
+  #A non-linear, predictive model is fit to account for this using a 
+  #non-parametric regression tree.
+  a[['data']]@data["est_max_spillovers"] <- 0
+  a[['data']]@data[a[['data']]@data[t.name]==0,]["est_max_spillovers"] <- spillovers_c
+  x.var.str <- strsplit(as.character(a[[1]]), "~")[3]
+  pred.str <- paste("est_max_spillovers", "~", x.var.str)
+
+  prediction.results <- rpart(pred.str, data=a[['data']]@data, method="anova")
+  
+  #Remaining unexplained spillover potential.
+  #Defined as the total difference between predicted values and estimated spillover values.
+  #More complex metric of variance remaining should be considered in the future.
+  #Capped at 100% and 0%.
+  
+  #absolute deviation vector
+  abs.dev.vec <- abs(a[['data']]@data[a[['data']]@data[t.name]==0,]["est_max_spillovers"] - predict(prediction.results, newdata=a[['data']]))
+  
+  #Deviance as a percentage of total spillover
+  #A "1" (or greater) would indicate no spillover was explained by the covariates.
+  #A "0" would indicate all spillover was explained by the covariates.
+  prop.exp <- abs.dev.vec / a[['data']]@data[a[['data']]@data[t.name]==0,]["est_max_spillovers"]
+  prop.exp[prop.exp > 1] <- 1
+  
+  #Covariate-weighted adjustement
+  Yc.star <- Yc - (spillovers_c * prop.exp)
   
 
   
@@ -134,8 +167,6 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   outcome.variable.adjusted <- paste(outcome.variable,outcome.suffix,sep="")
   a[['data']]@data[outcome.variable.adjusted] <- a[['data']]@data[outcome.variable]
   a[['data']]@data[a[['data']]@data[t.name]==0,][outcome.variable.adjusted] <- Yc.star
-  a[['data']]@data["est_spillovers"] <- 0
-  a[['data']]@data[a[['data']]@data[t.name]==0,]["est_spillovers"] <- spillovers_c
   
   #Object with pre- and post statistics.
   pre.post.spatial <- 
