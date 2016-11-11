@@ -71,7 +71,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
     Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     #Adjustment for covariate-explained potential decays
-    Yc.spill.est.genB <- Yc.spill.est.genA * (1-Bct)
+    Yc.spill.est.genB <- Yc.spill.est.genA * (Bct)
     Yc.spill.est.genC <- sweep(Yc.spill.est.genB,MARGIN=2,Yt[[1]],'*')
     Yc.spill.est <- rowSums(Yc.spill.est.genC)
     return(Yc.spill.est)
@@ -187,7 +187,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
            dist.v = dist.vec, max.dist.v = max.dist.vec))
       
     }
-    
+    print(cLog)
     Bct <- dist.B(Dct, correlogs, inc)
       
     #Finally, we calculate a vector of estimated spillovers for treated cases
