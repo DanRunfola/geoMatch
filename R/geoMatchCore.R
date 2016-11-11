@@ -60,7 +60,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     Yc.spill.est.genB <- sweep(Yc.spill.est.genA,MARGIN=2,Yt[[1]],'*')
     Yc.spill.est <- rowSums(Yc.spill.est.genB)
-    print(abs(Yc - Yc.spill.est))
+    print(mean(abs(Yc - Yc.spill.est)))
     Yc.err = mean(abs(Yc - Yc.spill.est))
     return(Yc.err)
   }
