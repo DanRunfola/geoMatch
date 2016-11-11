@@ -142,22 +142,15 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   pred.str <- paste("est_max_spillovers", "~", x.var.str)
 
   prediction.results <- lm(pred.str, data=a[['data']]@data)
+
+  variance.explained <- summary(lm(vec ~vec2))[8]
   
-  #Remaining unexplained spillover potential.
-  #Defined as the total difference between predicted values and estimated spillover values.
-  #More complex metric of variance remaining should be considered in the future.
-  #Capped at 100% and 0%.
+  #Multiplier - 0 would indicate all variance was explained by betas.
+  #1 indicates none was.
+  prop.exp <- (1 - variance.explained)
   
-  #absolute deviation vector
-  abs.dev.vec <- abs(a[['data']]@data[a[['data']]@data[t.name]==0,]["est_max_spillovers"] - predict(prediction.results, newdata=a[['data']]))
-  
-  #Deviance as a percentage of total spillover
-  #A "1" (or greater) would indicate no spillover was explained by the covariates.
-  #A "0" would indicate all spillover was explained by the covariates.
-  prop.exp <- abs.dev.vec / a[['data']]@data[a[['data']]@data[t.name]==0,]["est_max_spillovers"]
-  prop.exp[prop.exp > 1] <- 1
-  
-  #Covariate-weighted adjustement
+  #Covariate-weighted adjustement.
+  #Variance estimates could be weighted for individual observations eventually.
   Yc.star <- Yc - (spillovers_c * prop.exp)
   
 
