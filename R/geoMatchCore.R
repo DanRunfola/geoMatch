@@ -135,14 +135,13 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   #this additionally mitigates potential OVB (when taken in conjunction
   #with the spillover adjustments).
   
-  #A non-linear, predictive model is fit to account for this using a 
-  #non-parametric regression tree.
+  #A predictive model is fit to account for this 
   a[['data']]@data["est_max_spillovers"] <- 0
   a[['data']]@data[a[['data']]@data[t.name]==0,]["est_max_spillovers"] <- spillovers_c
   x.var.str <- strsplit(as.character(a[[1]]), "~")[3]
   pred.str <- paste("est_max_spillovers", "~", x.var.str)
 
-  prediction.results <- rpart(pred.str, data=a[['data']]@data, method="anova")
+  prediction.results <- lm(pred.str, data=a[['data']]@data)
   
   #Remaining unexplained spillover potential.
   #Defined as the total difference between predicted values and estimated spillover values.
