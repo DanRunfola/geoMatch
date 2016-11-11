@@ -187,7 +187,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
            dist.v = dist.vec, max.dist.v = max.dist.vec))
       
     }
-    print(cLog)
+
     Bct <- dist.B(Dct, correlogs, inc)
       
     #Finally, we calculate a vector of estimated spillovers for treated cases
