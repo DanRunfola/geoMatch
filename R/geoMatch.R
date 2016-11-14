@@ -15,7 +15,6 @@
 #' @import sp
 #' @import MatchIt
 #' @import BB
-#' @import ncf
 #' @details
 #' geoMatch overcomes two challenges.  First, it seeks to first remove spillover from control outcome measures,
 #' for example a case where a clinic may improve health outcomes in both the geographic neighborhood
@@ -55,6 +54,8 @@
 #'@param ... The first parameters provided to geoMatch should be a traditional MatchIt specification.  Full documentation on MatchIt is available online at http://gking.harvard.edu/matchit. Dataframe must be a spatial points dataframe.
 #'@param outcome.variable The name of the outcome variable that will be modeled to establish causal effect.  This must be an existing attribute in the spatial dataframe passed to geoMatch.
 #'@param outcome.suffix Suffix for the returned column name with spillover-adjusted outcome data.
+#'@param spill.par defines the assumed percentage of maximum T spillover attributable to T, as opposed to other sources.  More conservative values (i.e., 0.1 or lower) will result in more conservative estimates of impact.  Setting this to zero will result in a solution identical to a non-spatial MatchIt.
+#'@param f.tol defines the tolerance for convergence.
 #'@return This function will return a MatchIt object, with a spatial data frame accesible in $spdf.
 #'@example /demo/match.spatial.data.R
 #'@source \url{http://geo.aiddata.org/}
@@ -67,7 +68,7 @@
 #'Daniel Ho, Kosuke Imai, Gary King, and Elizabeth Stuart (2007). Matching as Nonparametric Preprocessing for Reducing Model Dependence in Parametric Causal Inference. Political Analysis 15(3): 199-236. http://gking.harvard.edu/files/abs/matchp-abs.shtml
 #'}
 
-geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted", max.it = 10000, report=FALSE)
+geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted", max.it = 10000, report=FALSE, spill.par = 0.1, f.tol=0.00000001)
 {
   spatial_match = -1
   a <- list(...)
@@ -127,7 +128,7 @@ geoMatch <- function (..., outcome.variable,outcome.suffix="_adjusted", max.it =
     if(class(a[['data']])[1] == "SpatialPointsDataFrame")
     {
       o_var <- outcome.variable
-      geoMatch.Core(..., outcome.variable = o_var, m.it=max.it, v = report) 
+      geoMatch.Core(..., outcome.variable = o_var, m.it=max.it, v = report, spill.par = spill.par, f.tol=f.tol) 
     }
     else
     {

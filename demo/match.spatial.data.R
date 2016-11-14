@@ -1,5 +1,5 @@
 library(geoMatch)
-
+set.seed(500)
 ###
 ### An Example Script for Obtaining Matched Data when you have
 ### Spatial information
@@ -10,18 +10,18 @@ data(lalonde)
 library(MatchIt)
 match.out1 <- matchit(treat ~ age + educ + black + hispan + 
                         nodegree + married + re74 + re75, 
+                      caliper=0.5,
                   method = "nearest", data = lalonde)
 
 ##Example model performed after matching, including both Control and Treatment groups
-lm.out1 <- lm(re78 ~ treat + age + educ + black + hispan + 
-                nodegree + married + re74 + re75 + distance, 
+lm.out1 <- lm(re78 ~ treat + age + educ + black + hispan + nodegree + 
+                married + re74 + re75 + distance, 
               data = match.data(match.out1))
 summary(lm.out1)
 
 ##Simulate Latitude and Longtiude information for each point, 
 ##with enforced spatial correlation.
 library(sp)
-set.seed(500)
 coords = cbind(runif(nrow(lalonde),37.1708,37.3708), 
                runif(nrow(lalonde),76.6069,76.8069))
 
@@ -31,15 +31,19 @@ spatial_lalonde <- SpatialPointsDataFrame(coords, lalonde)
 ##Matching and adjusting for spillover effects
 ##See ?geoMatch for more parameters specific to spatial data.
 ##See ?MatchIt for more options for matching methods.
-match.out2 <- geoMatch(treat ~ age + educ + black + hispan + nodegree + 
-                         married + re74 + re75, 
+##f.tol is set to a relatively high value to guarantee convergence
+##for this example.
+match.out2 <- geoMatch(treat ~ age + educ + black + hispan + 
+                         nodegree + married + re74 + re75, 
                       method = "nearest", 
-                      caliper=0.25, 
+                      caliper=0.5, 
                       data = spatial_lalonde, 
                       outcome.variable="re78", 
                       outcome.suffix="_adjusted",
-                      optim.iterations = 100)
-
+                      max.it = 10000,
+                      f.tol = 1.0,
+                      report=TRUE,
+                      spill.par = 0.1)
 
 ##Example maps 
 spplot(match.out2$spdf, z="matched", col.regions=c("red","green"), 
@@ -54,10 +58,10 @@ match.out2$spdf@data["spill_percent"] <- 100 *
 
 spplot(match.out2$spdf[!is.infinite(match.out2$spdf@data$spill_percent) & 
                          match.out2$spdf@data$treat == 0,], 
-       z="spill_percent", 
-       main="% Outcome Attributable to Spillover",
-       pretty=TRUE,
-       cuts=5)
+                         z="spill_percent", 
+                         main="% Outcome Attributable to Spillover",
+                         pretty=TRUE,
+                         cuts=5)
 
 ##Example model performed after spatial spillover adjustment, using matched data
 lm.out2 <- lm(re78_adjusted ~ treat + age + educ + black + hispan + nodegree + 

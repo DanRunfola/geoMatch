@@ -1,5 +1,5 @@
 #Core functionality for the geoMatch MatchIt wrapper.
-geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.it = 10000, v = FALSE){
+geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.it = 10000, v = FALSE, spill.par=0.1, f.tol=0.00000001){
   a <- list(...)
   #Remove spillover from all C outcomes, then matches.
   #Mitigates OVB through PSM matching, but does not take
@@ -30,6 +30,7 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
     ct <- spDistsN1(t.coords, c.coords[i,], longlat = TRUE)
     Dct[i,] <- ct
   }
+  
   
   #Yt - Vector. Known outcome at each T.
   Yt.gen <- a[['data']][as.vector(a[['data']]@data[t.name]==1),]
@@ -71,9 +72,9 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
     Yc.spill.est.genA = S * ((3/2) * (Dct / D) - (1/2) * (Dct/D)^3)
     Yc.spill.est.genA[Yc.spill.est.genA < 0.0] <- 0
     #Adjustment for covariate-explained potential decays
-    Yc.spill.est.genB <- Yc.spill.est.genA * (1 - Bct)
+    Yc.spill.est.genB <- Yc.spill.est.genA 
     Yc.spill.est.genC <- sweep(Yc.spill.est.genB,MARGIN=2,Yt[[1]],'*')
-    Yc.spill.est <- rowSums(Yc.spill.est.genC)
+    Yc.spill.est <- rowSums(Yc.spill.est.genC) 
     return(Yc.spill.est)
   }
   
@@ -106,9 +107,8 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
         fn=sf.opt, 
         gr=NULL,
         lower = .00000000001,
-        ftol = .0000001,
         upper= 10,
-        control=list(trace=t, maxit = m.it, checkGrad = FALSE, M=15),
+        control=list(trace=t, maxit = m.it, ftol = f.tol, checkGrad = FALSE, M=15),
         Dct = Dct,
         quiet = q,
         ltyp.scale = ltyp.scale)
@@ -130,65 +130,9 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
   #(A) Spillover from the treatment unit itself
   #(B) Spatially autocorrelated influences on Y from autocorrelated Beta variables.
   
-  #In order to accurately estimate a Y value that accounts for spillover,
-  #We must now estimate the second source.
-  
-  #To do this, we adopt a highly conservative approach (that is more likely to lead to)
-  #under-, rather than over-, estimates of T.
-  
-  #First, we calculate the rate at which each specified X variable can explain
-  #itself over varying distances (correlogram).
-  
-    x.var.str <- strsplit(as.character(a[[1]]), "~")[3]
-    x.var.vec <- strsplit(as.character(x.var.str), "+")
-    
-    lat.vals <- coordinates(a[['data']])[,2]
-    lon.vals <- coordinates(a[['data']])[,1]
-    
-    correlogs <- list()
-    
-    inc = (mean(Dct) / 20) * 2 #Roughly equal number (10) of bins on either side of the mean.
-    
-    for(x.var.id in 1:length(x.var.vec))
-    {
-      cur.x <- x.var.vec[x.var.id][[1]]
-      cLog <- correlog(lon.vals, lat.vals, a[['data']]@data[cur.x][[1]], 
-                                      na.rm=T, latlon=T, increment = inc, quiet=TRUE,
-                                      resamp=100)
-      correlogs[[x.var.id]] <- as.vector(cLog$correlation)
-    }
-  
-    #Second, for each Dct we identify the maximum correlogram value
-    #Across all X variables.  This represents - from the available data -
-    #An estimate of the maximum possible similarity due to 
-    #other driving covariates.
-    
-    dist.B <- function(Dct, correlogs, binsize)
-    {
-      max.dist.vec <- list()
-      for(p in 1:length(correlogs))
-      {
-        for(b in 1:length(correlogs[[1]]))
-        {
-          if(p == 1)
-          {
-            max.dist.vec[b] <- abs(correlogs[[1]][b])
-          }
-          else
-          {
-            max.dist.vec[b] <- max(abs(max.dist.vec[b]), abs(correlogs[[p]][b]))
-          }
-        }
-      }
-      
-      dist.vec <- binsize * as.vector(1:b)
-     return(apply(Dct, c(1,2),  
-           FUN=function(x,dist.v,max.dist.v) max.dist.v[which(abs(dist.v-x)==min(abs(dist.v-x)))][[1]], 
-           dist.v = dist.vec, max.dist.v = max.dist.vec))
-      
-    }
-
-    Bct <- dist.B(Dct, correlogs, inc)
+  #To avoid assumptions, we have the user parameterize spill.par,
+    #Which makes an assumption about the share.
+    #This defaults to a very conservative 10%.
       
     #Finally, we calculate a vector of estimated spillovers for treated cases
     #to use in our adjustment of Y.
@@ -197,12 +141,12 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
     #Yc* = Yc - (sf[Dct, Ut]*Yt) [Note: Yt multiplier is applied in the function
     #to make this code easier to read].
       
-    spillovers_c <- sf(Ut, Dct, p.scale, Bct)
+    spillovers_c <- sf(Ut, Dct, p.scale, spill.par)
   
     
     #Covariate-weighted adjustement.
     #Variance estimates could be weighted for individual observations eventually.
-    Yc.star <- Yc - spillovers_c
+    Yc.star <- Yc - (spillovers_c* spill.par)
     
   
     
@@ -220,12 +164,16 @@ geoMatch.Core <- function (..., outcome.variable,outcome.suffix="_adjusted", m.i
     spdfA <- a[['data']]
     dfA <- as.data.frame(a[['data']]@data)
     a[['data']] <- dfA
+
     m.res <- do.call("matchit", a)
-  
+
+    
     spdfA@data$weights <- m.res$weights
     spdfA@data$matched <- m.res$weights>0
     spdfA@data$distance <- m.res$distance
-    
+    spdfA@data$est_spillovers <- (spdfA@data[outcome.variable.adjusted] - spdfA@data[outcome.variable])[[1]]
+
+   
     m.res$spdf <- spdfA
     m.res$optim <- (Ut.optim$convergence == 0)
     
